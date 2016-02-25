@@ -54,6 +54,9 @@ rignot_bin="rignot_bin"
 rignot_nc="rignot_velocity_1km.nc"
 rignot_link="https://secure.antarctica.ac.uk/data/bedmap2/resources/Rignot_velocity/bin.zip"
 rignot_data="rignot_data"
+N2 = 5602
+x0_rig=2800500.
+y0_rig=2801500.
 if not os.path.exists(rignot_bin): 
   print "Downloading "+rignot_data
   os.system("wget "+rignot_link)
@@ -67,6 +70,10 @@ arthern_bin="arthern_bin"
 arthern_nc="arthern_accumulation_1km.nc"
 arthern_link="https://secure.antarctica.ac.uk/data/bedmap2/resources/Arthern_accumulation/Arthern_accumulation_bin.zip"
 arthern_data="arthern_data"
+N3a=7899
+N3b=8300
+x0_art=3949500.
+y0_art=x0_art
 if not os.path.exists(arthern_bin): 
   print "Downloading "+arthern_link.split("/")[-1]
   os.system("wget "+arthern_link)
@@ -80,6 +87,9 @@ bedmap2_link="https://secure.antarctica.ac.uk/data/bedmap2/"+bedmap2_bin+".zip"
 bedmap2_data="bedmap2_data"
 bedmap2_nc= 'bedmap2_1km.nc'
 ncbm2_name=bedmap2_data+"/"+bedmap2_nc
+N=6667
+x0_bm2= 3333500.
+y0_bm2=x0_bm2
 if not os.path.exists(bedmap2_bin):
   print "Downloading "+bedmap2_bin+"\n"
   os.system("wget " + bedmap2_link)
@@ -89,7 +99,6 @@ if not os.path.exists(bedmap2_bin):
 
 if not os.path.isfile(bedmap2_data+"/"+bedmap2_nc):
   os.system("mkdir "+bedmap2_data)
-  N = 6667
   print "Reading bedmap2 binary files from %s ...\n" % (bedmap2_bin)
 
   fname = bedmap2_bin + '/bedmap2_bed.flt'
@@ -109,26 +118,23 @@ if not os.path.isfile(bedmap2_data+"/"+bedmap2_nc):
   print " range of bedunc = [%.2f, %.2f]" % (bedunc.min(),bedunc.max())
   print " range of usurf = [%.2f, %.2f]" % (usurf.min(),usurf.max())
 
+
   ### add Rignot velocity data   ##########################################
   print "\nReading Rignot binary file from %s ...\n" % (rignot_bin)
-
-  N2 = 5602
-  x0=(3333500-2800500)/1000
-  y0=(3333500-2801500)/1000
+  x0=(x0_bm2-x0_rig)/1000.
+  y0=(y0_bm2-y0_rig)/1000.
   fname = rignot_bin + '/rignot_velocity_bedmap2_grid.flt'
   vel = np.flipud(np.ma.masked_equal(np.reshape(np.fromfile(fname,dtype=np.float32),(N2,N2)),-9999.0))
   print " range of vel = [%.2f, %.2f]" % (vel.min(),vel.max())
-  vel_bm2=np.zeros([N,N])
+  vel_bm2=np.ones([N,N])*(-9999.0)
   vel_bm2[x0:x0+N2,y0:y0+N2]=vel
   vel_bm2=np.ma.masked_array(vel_bm2, mask=(vel_bm2==-9999.))
 
+
   ### add Arthern accumulation data   ##########################################
   print "\nReading Arthern binary file from %s ...\n" % (arthern_bin)
-
-  N3a= 7899
-  N3b=8300
-  x0=-(3333500-3949500)/1000
-  y0=-(3333500-3949500)/1000
+  x0=(x0_art-x0_bm2)/1000.
+  y0=(y0_art-y0_bm2)/1000.
   fname = arthern_bin + '/arthern_accumulation_bedmap2_grid.flt'
   accum = np.flipud(np.ma.masked_equal(np.reshape(np.fromfile(fname,dtype=np.float32),(N3b,N3a)),-9999.0))
   #fname = arthern_bin + '/arthern_accumulation_rms_bedmap2_grid.flt'
@@ -283,9 +289,8 @@ artm   = ncalb.variables['air_temp'][:]
 
 xgrid, ygrid = np.meshgrid(xalb,yalb)
 # adjust bedm2 to centered x,y, see bedmap2 readme file
-xbm2 -= 3333500.
-#ybm2 -= 3333500. - 395000.0
-ybm2 -= 3333500.
+xbm2 -= x0_bm2
+ybm2 -= x0_bm2
 
 thkbm2 = np.asarray((interp(thk, xbm2, ybm2, xgrid, ygrid )))
 topgbm2 = np.asarray((interp(topg, xbm2, ybm2, xgrid, ygrid )))
