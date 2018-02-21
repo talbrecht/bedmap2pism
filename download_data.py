@@ -118,8 +118,8 @@ if not os.path.isfile(bedmap2_data+"/"+bedmap2_nc):
 
   ### add Rignot velocity data   ##########################################
   print "\nReading Rignot binary file from %s ...\n" % (rignot_bin)
-  x0=(x0_bm2-x0_rig)/1000.
-  y0=(y0_bm2-y0_rig)/1000.
+  x0=int((x0_bm2-x0_rig)/1000.)
+  y0=int((y0_bm2-y0_rig)/1000.)
   fname = rignot_bin + '/rignot_velocity_bedmap2_grid.flt'
   vel = np.flipud(np.ma.masked_equal(np.reshape(np.fromfile(fname,dtype=np.float32),(N2,N2)),-9999.0))
   print " range of vel = [%.2f, %.2f]" % (vel.min(),vel.max())
@@ -130,8 +130,8 @@ if not os.path.isfile(bedmap2_data+"/"+bedmap2_nc):
 
   ### add Arthern accumulation data   ##########################################
   print "\nReading Arthern binary file from %s ...\n" % (arthern_bin)
-  x0=(x0_art-x0_bm2)/1000.
-  y0=(y0_art-y0_bm2)/1000.
+  x0=int((x0_art-x0_bm2)/1000.)
+  y0=int((y0_art-y0_bm2)/1000.)
   fname = arthern_bin + '/arthern_accumulation_bedmap2_grid.flt'
   accum = np.flipud(np.ma.masked_equal(np.reshape(np.fromfile(fname,dtype=np.float32),(N3b,N3a)),-9999.0))
   #fname = arthern_bin + '/arthern_accumulation_rms_bedmap2_grid.flt'
